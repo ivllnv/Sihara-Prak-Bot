@@ -72,6 +72,7 @@ async function getOrCreateThread(chatId, userId) {
   return thread.id;
 }
 
+console.log("Processing message:", text);
 // Send user input to the assistant and return the response
 async function runAssistant(chatId, userId, userText) {
   const threadId = await getOrCreateThread(chatId, userId);
@@ -93,6 +94,7 @@ async function runAssistant(chatId, userId, userText) {
   );
   return assistantMessage?.content?.[0]?.text?.value || "No response generated.";
 }
+console.log("Run status:", run.status);
 
 // Construct Telegram webhook URL
 const WEBHOOK_URL = `${RENDER_EXTERNAL_URL}/webhook/${BOT_SECRET}`;
