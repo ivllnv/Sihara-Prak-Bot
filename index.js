@@ -1,5 +1,3 @@
-// SiharaPrakBot Telegram webhook server using OpenAI Assistants API
-
 import "dotenv/config";
 
 import express from "express"; // Express server for webhook handling
@@ -105,6 +103,11 @@ await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook`, {
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ url: WEBHOOK_URL }),
 });
+
+app.use((req, res, next) => {
+  console.log("Incoming request:", req.method, req.url);
+  next();
+}); // delete later
 
 // Handle incoming Telegram webhook updates
 app.post(`/webhook/${BOT_SECRET}`, async (req, res) => {
