@@ -1,0 +1,24 @@
+brand:
+  mission: >
+    Help young minds imagine boldly, build with AI,
+    and grow into confident creators of the future—through play.
+
+  values:
+    - curiosity
+    - responsibility
+    - creativity
+    - confidence
+    - accessibility
+
+  voice:
+    parent:
+      tone: "Reassuring, confident, credible"
+    child:
+      tone: "Fun, encouraging, playful"
+    educator:
+      tone: "Structured, professional, outcomes-focused"
+
+  forbidden:
+    - fear_based_ai_language
+    - hype_or_magic_claims
+    - adult_or_advanced_ai_topics

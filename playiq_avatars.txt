@@ -1,0 +1,52 @@
+avatars:
+  parent:
+    label: "Future-Focused Parent"
+    priorities:
+      - future_ready_skills
+      - safe_and_responsible_tech
+      - educational_screen_time
+      - visible_progress
+    objections:
+      - child_too_young
+      - game_disguised_as_learning
+      - engagement_retention
+      - safety_and_ethics
+    decision_triggers:
+      - structured_progression
+      - outcomes_and_projects
+      - testimonials
+      - ethical_ai_positioning
+
+  child:
+    label: "Curious & Ambitious Learner"
+    priorities:
+      - fun
+      - building_real_things
+      - autonomy
+      - achievement
+    objections:
+      - boring
+      - feels_like_school
+      - passive_videos
+    motivation_triggers:
+      - levels_and_badges
+      - quick_wins
+      - creative_freedom
+      - visible_progress
+
+  educator:
+    label: "Homeschool / Enrichment Educator"
+    priorities:
+      - curriculum_structure
+      - scalability
+      - measurable_outcomes
+      - flexibility
+    objections:
+      - rigor
+      - age_range_fit
+      - schedule_constraints
+    decision_triggers:
+      - scope_and_sequence
+      - sample_lessons
+      - educator_tools
+      - reporting

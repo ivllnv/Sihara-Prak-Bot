@@ -1,0 +1,28 @@
+smart_goal:
+  primary_goal: >
+    Launch PlayIQ™ NextGen AI Learning and acquire
+    250 paying subscribers in the U.S. market.
+
+  metrics:
+    subscribers: 250
+    mrr_target: "$5,000–$10,000"
+    retention_30_day: ">=60%"
+
+  timeline_months: 6
+
+  milestones:
+    month_1: "MVP finalized and internal testing"
+    month_2: "Website live, early access signups"
+    month_3: "Beta launch, first 50 paying users"
+    month_4_5: "Marketing optimization to 150 users"
+    month_6: "Reach 250 subscribers and review"
+
+  risks:
+    - low_brand_trust
+    - early_engagement_drop
+    - founder_bandwidth
+
+  mitigation:
+    - testimonials_and_trials
+    - onboarding_and_gamification
+    - outsourcing_non_core_tasks

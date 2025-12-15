@@ -1,0 +1,43 @@
+product:
+  name: "PlayIQ™ NextGen AI Learning"
+  type: "Subscription-based digital learning platform"
+  audience:
+    - children_ages_6_14
+    - parents
+    - homeschool_and_enrichment_educators
+  core_promise: >
+    Teach children how AI works through play-based, gamified,
+    age-appropriate learning that builds confidence, creativity,
+    and future-ready skills.
+
+  learning_model:
+    approach:
+      - play_based_learning
+      - hands_on_projects
+      - progressive_levels
+      - gamification
+    progression:
+      - beginner_ai_concepts
+      - applied_problem_solving
+      - creative_ai_projects
+      - responsible_ai_use
+
+  delivery_context:
+    environments:
+      - home_learning
+      - homeschool
+      - after_school_programs
+      - classrooms
+
+  differentiation:
+    - age_appropriate_ai_education
+    - ethical_and_responsible_ai_focus
+    - not_coding_only_not_passive_content
+    - confidence_and_creativity_first
+
+  revenue_model:
+    streams:
+      - monthly_subscription
+      - annual_subscription
+      - group_and_multi_seat_access
+      - future_institutional_licensing

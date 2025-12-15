@@ -1,0 +1,12 @@
+# Environment
+.env
+
+# Thread persistence
+sihara_threads.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
