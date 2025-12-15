@@ -72,7 +72,6 @@ async function getOrCreateThread(chatId, userId) {
   return thread.id;
 }
 
-console.log("Processing message:", text);
 // Send user input to the assistant and return the response
 async function runAssistant(chatId, userId, userText) {
   const threadId = await getOrCreateThread(chatId, userId);
@@ -112,34 +111,54 @@ app.use((req, res, next) => {
 
 // Handle incoming Telegram webhook updates
 app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
-  res.sendStatus(200); // Immediately acknowledge Telegram to avoid webhook timeouts
+  res.sendStatus(200); // Immediately acknowledge Telegram to prevent timeouts
 
   (async () => {
     try {
+      console.log("Webhook hit:", JSON.stringify(req.body));
+
       const message = req.body?.message;
-      if (!message || !message.text) return; // Ignore non-text updates
+      if (!message || !message.text) {
+        console.log("No message text found, ignoring update.");
+        return;
+      }
 
       const chatId = message.chat.id;
       const userId = message.from?.id;
       const chatType = message.chat.type;
       let text = message.text.trim();
 
+      console.log("Incoming message:", {
+        chatId,
+        userId,
+        chatType,
+        text,
+      });
+
       const isPrivate = chatType === "private";
       const mentionTag = `@${BOT_USERNAME}`;
 
-      if (!isPrivate && !text.includes(mentionTag)) return; // Only respond in groups when mentioned
-
-      if (!isPrivate) {
-        text = text.replace(mentionTag, "").trim(); // Strip mention before sending to assistant
+      if (!isPrivate && !text.includes(mentionTag)) {
+        console.log("Group message without mention, ignored.");
+        return;
       }
 
-      const reply = await runAssistant(chatId, userId, text); // Process message through OpenAI Assistant
+      if (!isPrivate) {
+        text = text.replace(mentionTag, "").trim();
+        console.log("Stripped group mention text:", text);
+      }
 
+      console.log("Sending message to assistant...");
+      const reply = await runAssistant(chatId, userId, text);
+      console.log("Assistant reply received:", reply);
+
+      console.log("Sending reply to Telegram...");
       await bot.sendMessage(chatId, reply, {
         reply_to_message_id: message.message_id,
       });
+      console.log("Reply sent successfully.");
     } catch (err) {
-      console.error("Webhook processing error:", err.message); // Log async processing errors
+      console.error("Webhook processing error:", err);
     }
   })();
 });
