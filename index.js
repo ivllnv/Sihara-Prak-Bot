@@ -93,8 +93,8 @@ async function runAssistant(chatId, userId, userText) {
     (m) => m.role === "assistant"
   );
   return assistantMessage?.content?.[0]?.text?.value || "No response generated.";
+  console.log("Run status:", run.status);
 }
-console.log("Run status:", run.status);
 
 // Construct Telegram webhook URL
 const WEBHOOK_URL = `${RENDER_EXTERNAL_URL}/webhook/${BOT_SECRET}`;
