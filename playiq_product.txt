@@ -1,43 +1,88 @@
-product:
-  name: "PlayIQ™ NextGen AI Learning"
-  type: "Subscription-based digital learning platform"
-  audience:
-    - children_ages_6_14
-    - parents
-    - homeschool_and_enrichment_educators
-  core_promise: >
-    Teach children how AI works through play-based, gamified,
-    age-appropriate learning that builds confidence, creativity,
-    and future-ready skills.
+playiq_product:
+    product:
+      name: "PlayIQ™ NextGen AI Learning"
+      type: "Subscription-based digital learning platform"
+      audience:
+        - children_ages_6_14
+        - parents
+        - homeschool_and_enrichment_educators
+      core_promise: >
+        Teach children how AI works through play-based, gamified,
+        age-appropriate learning that builds confidence, creativity,
+        and future-ready skills.
 
-  learning_model:
-    approach:
-      - play_based_learning
-      - hands_on_projects
-      - progressive_levels
-      - gamification
-    progression:
-      - beginner_ai_concepts
-      - applied_problem_solving
-      - creative_ai_projects
-      - responsible_ai_use
+      learning_model:
+        approach:
+          - play_based_learning
+          - hands_on_projects
+          - progressive_levels
+          - gamification
+        progression:
+          - beginner_ai_concepts
+          - applied_problem_solving
+          - creative_ai_projects
+          - responsible_ai_use
 
-  delivery_context:
-    environments:
-      - home_learning
-      - homeschool
-      - after_school_programs
-      - classrooms
+      delivery_context:
+        environments:
+          - home_learning
+          - homeschool
+          - after_school_programs
+          - classrooms
 
-  differentiation:
-    - age_appropriate_ai_education
-    - ethical_and_responsible_ai_focus
-    - not_coding_only_not_passive_content
-    - confidence_and_creativity_first
+      differentiation:
+        - age_appropriate_ai_education
+        - ethical_and_responsible_ai_focus
+        - not_coding_only_not_passive_content
+        - confidence_and_creativity_first
 
-  revenue_model:
-    streams:
-      - monthly_subscription
-      - annual_subscription
-      - group_and_multi_seat_access
-      - future_institutional_licensing
+      revenue_model:
+        streams:
+          - monthly_subscription
+          - annual_subscription
+          - group_and_multi_seat_access
+          - future_institutional_licensing
+
+  playiq_commerce:
+    amazon_listings:
+      - product_name: "PLAYIQ 181-Piece Magnetic Building Blocks Set"
+        category: "STEM Toys / Magnetic Construction"
+        brand: "PLAYIQ"
+        asin: "B0F3LV725Z"
+        age_range: "3–10 years"
+        price_usd: 49.90
+        rating:
+          stars: 4.6
+          reviews: 34
+        key_value_props:
+          - space_themed_magnetic_blocks
+          - glow_in_the_dark_aliens_and_astronauts
+          - led_light_up_figures
+          - stem_learning_through_play
+          - screen_free_creative_building
+        learning_benefits:
+          - fine_motor_skills
+          - 3d_thinking
+          - creativity
+          - problem_solving
+          - teamwork
+        safety_and_quality:
+          - bpa_free
+          - ce_certified
+          - rounded_child_safe_edges
+          - strong_magnets
+          - eco_friendly_materials
+        compatibility:
+          - standard_2x2cm_magnetic_blocks
+        included_items:
+          - 181_magnetic_pieces
+          - glow_characters
+          - led_light_up_cubes
+          - double_sided_magnetic_board
+          - scene_guidebook_with_6_builds
+          - storage_box
+        positioning_rule: >
+          When referencing physical products, frame them as
+          creativity- and confidence-building STEM play that
+          complements PlayIQ’s digital learning philosophy,
+          not as standalone AI education.

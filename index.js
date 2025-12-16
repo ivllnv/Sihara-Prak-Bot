@@ -1,10 +1,13 @@
 import "dotenv/config";
 
-import express from "express"; // Express server for webhook handling
-import TelegramBot from "node-telegram-bot-api"; // Telegram Bot API client
-import OpenAI from "openai"; // OpenAI SDK for Assistants API
-import axios from "axios"; // HTTP client for keep-alive ping
-import fs from "fs"; // File system for thread persistence
+import express from "express";
+import TelegramBot from "node-telegram-bot-api";
+import OpenAI from "openai";
+import axios from "axios";
+import fs from "fs";
+
+// 🔴 NEW: Prompt version (bump this whenever instructions change)
+const PROMPT_VERSION = "1.2";
 
 // Load required environment variables
 const {
@@ -62,12 +65,27 @@ function getThreadKey(chatId, userId) {
   return `${chatId}:${userId}`;
 }
 
-// Retrieve or create an OpenAI thread for a user
+// 🔴 UPDATED: Retrieve or create an OpenAI thread with prompt versioning
 async function getOrCreateThread(chatId, userId) {
   const key = getThreadKey(chatId, userId);
-  if (threads[key]) return threads[key];
+  const existing = threads[key];
+
+  if (
+    existing &&
+    existing.thread_id &&
+    existing.prompt_version === PROMPT_VERSION
+  ) {
+    return existing.thread_id;
+  }
+
+  // Create a new thread if none exists or prompt version changed
   const thread = await openai.beta.threads.create();
-  threads[key] = thread.id;
+
+  threads[key] = {
+    thread_id: thread.id,
+    prompt_version: PROMPT_VERSION,
+  };
+
   saveThreads();
   return thread.id;
 }
@@ -75,23 +93,32 @@ async function getOrCreateThread(chatId, userId) {
 // Send user input to the assistant and return the response
 async function runAssistant(chatId, userId, userText) {
   const threadId = await getOrCreateThread(chatId, userId);
+
   await openai.beta.threads.messages.create(threadId, {
     role: "user",
     content: userText,
   });
+
   const run = await openai.beta.threads.runs.createAndPoll(threadId, {
     assistant_id: ASSISTANT_ID,
   });
+
   if (run.status !== "completed") {
     throw new Error(`Assistant run failed with status: ${run.status}`);
   }
+
   const messages = await openai.beta.threads.messages.list(threadId, {
     limit: 5,
   });
+
   const assistantMessage = messages.data.find(
     (m) => m.role === "assistant"
   );
-  return assistantMessage?.content?.[0]?.text?.value || "No response generated.";
+
+  return (
+    assistantMessage?.content?.[0]?.text?.value ||
+    "No response generated."
+  );
 }
 
 // Construct Telegram webhook URL
@@ -107,56 +134,36 @@ await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook`, {
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
   next();
-}); 
+});
 
 // Handle incoming Telegram webhook updates
 app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
-  res.sendStatus(200); // Immediately acknowledge Telegram to prevent timeouts
+  res.sendStatus(200);
 
   (async () => {
     try {
-      console.log("Webhook hit:", JSON.stringify(req.body));
-
       const message = req.body?.message;
-      if (!message || !message.text) {
-        console.log("No message text found, ignoring update.");
-        return;
-      }
+      if (!message || !message.text) return;
 
       const chatId = message.chat.id;
       const userId = message.from?.id;
       const chatType = message.chat.type;
       let text = message.text.trim();
 
-      console.log("Incoming message:", {
-        chatId,
-        userId,
-        chatType,
-        text,
-      });
-
       const isPrivate = chatType === "private";
       const mentionTag = `@${BOT_USERNAME}`;
 
-      if (!isPrivate && !text.includes(mentionTag)) {
-        console.log("Group message without mention, ignored.");
-        return;
-      }
+      if (!isPrivate && !text.includes(mentionTag)) return;
 
       if (!isPrivate) {
         text = text.replace(mentionTag, "").trim();
-        console.log("Stripped group mention text:", text);
       }
 
-      console.log("Sending message to assistant...");
       const reply = await runAssistant(chatId, userId, text);
-      console.log("Assistant reply received:", reply);
 
-      console.log("Sending reply to Telegram...");
       await bot.sendMessage(chatId, reply, {
         reply_to_message_id: message.message_id,
       });
-      console.log("Reply sent successfully.");
     } catch (err) {
       console.error("Webhook processing error:", err);
     }
@@ -165,7 +172,7 @@ app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
 
 // Health check endpoint for Render
 app.get("/", (req, res) => {
-  res.send("SiharaPrakBot is running.");
+  res.send(`SiharaPrakBot is running. Prompt version ${PROMPT_VERSION}`);
 });
 
 // Start HTTP server
