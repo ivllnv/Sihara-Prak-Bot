@@ -6,10 +6,19 @@ import OpenAI from "openai";
 import axios from "axios";
 import fs from "fs";
 
-// 🔴 NEW: Prompt version (bump this whenever instructions change)
+// 🔴 PROMPT VERSION — bump when instructions change
 const PROMPT_VERSION = "1.2";
 
-// Load required environment variables
+// Thread storage file
+const THREADS_FILE = "./sihara_threads.json";
+
+// 🔴 ONE-TIME RESET AFTER DEPLOY
+if (fs.existsSync(THREADS_FILE)) {
+  fs.unlinkSync(THREADS_FILE);
+  console.log("✅ Old OpenAI threads cleared on startup");
+}
+
+// Load environment variables
 const {
   TELEGRAM_TOKEN,
   OPENAI_API_KEY,
@@ -20,7 +29,6 @@ const {
   RENDER_EXTERNAL_URL,
 } = process.env;
 
-// Validate required environment variables
 if (
   !TELEGRAM_TOKEN ||
   !OPENAI_API_KEY ||
@@ -32,20 +40,17 @@ if (
   process.exit(1);
 }
 
-// Initialize Express application
+// Express app
 const app = express();
 app.use(express.json());
 
-// Initialize Telegram bot without polling
+// Telegram bot
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: false });
 
-// Initialize OpenAI client
+// OpenAI client
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-// Define thread storage file path
-const THREADS_FILE = "./sihara_threads.json";
-
-// Load persisted threads from disk
+// Load threads
 let threads = {};
 if (fs.existsSync(THREADS_FILE)) {
   try {
@@ -55,17 +60,17 @@ if (fs.existsSync(THREADS_FILE)) {
   }
 }
 
-// Persist threads to disk
+// Save threads
 function saveThreads() {
   fs.writeFileSync(THREADS_FILE, JSON.stringify(threads, null, 2));
 }
 
-// Generate a unique thread key per chat and user
+// Thread key
 function getThreadKey(chatId, userId) {
   return `${chatId}:${userId}`;
 }
 
-// 🔴 UPDATED: Retrieve or create an OpenAI thread with prompt versioning
+// Get or create thread (with versioning)
 async function getOrCreateThread(chatId, userId) {
   const key = getThreadKey(chatId, userId);
   const existing = threads[key];
@@ -78,7 +83,6 @@ async function getOrCreateThread(chatId, userId) {
     return existing.thread_id;
   }
 
-  // Create a new thread if none exists or prompt version changed
   const thread = await openai.beta.threads.create();
 
   threads[key] = {
@@ -90,7 +94,7 @@ async function getOrCreateThread(chatId, userId) {
   return thread.id;
 }
 
-// Send user input to the assistant and return the response
+// Run assistant
 async function runAssistant(chatId, userId, userText) {
   const threadId = await getOrCreateThread(chatId, userId);
 
@@ -104,7 +108,7 @@ async function runAssistant(chatId, userId, userText) {
   });
 
   if (run.status !== "completed") {
-    throw new Error(`Assistant run failed with status: ${run.status}`);
+    throw new Error(`Assistant run failed: ${run.status}`);
   }
 
   const messages = await openai.beta.threads.messages.list(threadId, {
@@ -115,35 +119,25 @@ async function runAssistant(chatId, userId, userText) {
     (m) => m.role === "assistant"
   );
 
-  return (
-    assistantMessage?.content?.[0]?.text?.value ||
-    "No response generated."
-  );
+  return assistantMessage?.content?.[0]?.text?.value || "No response.";
 }
 
-// Construct Telegram webhook URL
+// Webhook
 const WEBHOOK_URL = `${RENDER_EXTERNAL_URL}/webhook/${BOT_SECRET}`;
 
-// Register Telegram webhook on startup
 await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ url: WEBHOOK_URL }),
 });
 
-app.use((req, res, next) => {
-  console.log("Incoming request:", req.method, req.url);
-  next();
-});
-
-// Handle incoming Telegram webhook updates
 app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
   res.sendStatus(200);
 
   (async () => {
     try {
       const message = req.body?.message;
-      if (!message || !message.text) return;
+      if (!message?.text) return;
 
       const chatId = message.chat.id;
       const userId = message.from?.id;
@@ -151,13 +145,10 @@ app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
       let text = message.text.trim();
 
       const isPrivate = chatType === "private";
-      const mentionTag = `@${BOT_USERNAME}`;
+      const mention = `@${BOT_USERNAME}`;
 
-      if (!isPrivate && !text.includes(mentionTag)) return;
-
-      if (!isPrivate) {
-        text = text.replace(mentionTag, "").trim();
-      }
+      if (!isPrivate && !text.includes(mention)) return;
+      if (!isPrivate) text = text.replace(mention, "").trim();
 
       const reply = await runAssistant(chatId, userId, text);
 
@@ -165,26 +156,23 @@ app.post(`/webhook/${BOT_SECRET}`, (req, res) => {
         reply_to_message_id: message.message_id,
       });
     } catch (err) {
-      console.error("Webhook processing error:", err);
+      console.error("Webhook error:", err);
     }
   })();
 });
 
-// Health check endpoint for Render
+// Health check
 app.get("/", (req, res) => {
-  res.send(`SiharaPrakBot is running. Prompt version ${PROMPT_VERSION}`);
+  res.send(`SiharaPrakBot running | prompt ${PROMPT_VERSION}`);
 });
 
-// Start HTTP server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
-// Periodic self-ping to prevent Render sleep
+// Prevent Render sleep
 setInterval(async () => {
   try {
     await axios.get(RENDER_EXTERNAL_URL);
-  } catch (err) {
-    console.error("Self-ping failed:", err.message);
-  }
+  } catch {}
 }, 180000);
